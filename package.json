@@ -1,0 +1,50 @@
+{
+	"name": "AwesomeApp",
+	"version": "0.0.1",
+	"private": true,
+	"scripts": {
+		"start": "node node_modules/react-native/local-cli/cli.js start",
+		"test": "jest",
+		"startEmulator": "$ANDROID_HOME/tools/emulator -avd Nexus_4_API_23",
+		"startServer": "react-native run-android",
+		"startAndroid": "yarn startEmulator & yarn startServer & wait",
+		"android-linux": "react-native bundle --platform android --dev false --entry-file index.android.js --bundle-output android/app/src/main/assets/index.android.bundle --assets-dest android/app/src/main/res && react-native run-android"
+	},
+	"dependencies": {
+		"babel-preset-react-native": "2",
+		"babel-preset-react-native-stage-0": "^1.0.1",
+		"react": "16.0.0-alpha.12",
+		"react-native": "0.47.1",
+		"react-native-push-notification": "^3.0.2",
+		"react-redux": "^5.0.6",
+		"redux": "^3.7.2",
+		"redux-observable": "^0.15.0",
+		"redux-promise-middleware": "^4.3.0",
+		"redux-saga": "^0.15.6",
+		"redux-thunk": "^2.2.0",
+		"rxjs": "^5.4.3"
+	},
+	"devDependencies": {
+		"babel-eslint": "^7.2.3",
+		"babel-jest": "20.0.3",
+		"babel-plugin-transform-class-properties": "^6.24.1",
+		"babel-preset-env": "^1.4.0",
+		"babel-preset-react": "^6.24.1",
+		"babel-preset-react-native": "^2.1.0",
+		"babel-preset-react-native-stage-0": "^1.0.1",
+		"babel-preset-stage-0": "^6.24.1",
+		"eslint": "^4.3.0",
+		"eslint-config-airbnb": "^15.1.0",
+		"eslint-loader": "^1.7.1",
+		"eslint-plugin-babel": "^4.1.2",
+		"eslint-plugin-import": "^2.0.0",
+		"eslint-plugin-jsx-a11y": "^5.1.0",
+		"eslint-plugin-react": "7.0.1",
+		"eslint-plugin-react-native": "^3.0.1",
+		"jest": "20.0.4",
+		"react-test-renderer": "16.0.0-alpha.12"
+	},
+	"jest": {
+		"preset": "react-native"
+	}
+}
