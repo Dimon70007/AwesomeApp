@@ -1,8 +1,15 @@
 package com.awesomeapp;
 
+import android.content.Intent;
 import com.facebook.react.ReactActivity;
 
 public class MainActivity extends ReactActivity {
+  // fcm fixes bug
+    @Override
+    public void onNewIntent(Intent intent) {
+        super.onNewIntent(intent);
+        setIntent(intent);
+    }
 
     /**
      * Returns the name of the main component registered from JavaScript.

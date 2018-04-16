@@ -24,7 +24,7 @@ export const styles = StyleSheet.create({
     marginBottom: 5,
   },
   block: {
-    flex: 2,
+    flex: 1,
     borderRadius: 4,
     borderColor: 'rgba(230, 222, 44, 0.32)',
     borderWidth: 2,

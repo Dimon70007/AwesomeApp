@@ -4,15 +4,15 @@
  * @flow
  */
 
-import React, { Component } from 'react';
+import React, { PureComponent } from 'react';
 import {
   AppRegistry,
   StyleSheet,
   Text,
-  View
+  View,
 } from 'react-native';
 
-export default class AwesomeApp extends Component {
+export default class AwesomeApp extends PureComponent {
   render() {
     return (
       <View style={styles.container}>
