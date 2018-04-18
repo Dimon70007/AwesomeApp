@@ -9,12 +9,15 @@ import {
   Platform,
   ScrollView,
   TouchableOpacity,
+  AsyncStorage,
 } from 'react-native';
 
 import { StackNavigator } from 'react-navigation';
-import FCM, { NotificationActionType } from 'react-native-fcm';
-import { registerKilledListener, registerAppListener } from './Listeners';
-import firebaseClient from './FirebaseClient';
+import FCM, { NotificationActionType, FCMEvent } from 'react-native-fcm';
+import { registerKilledListener, registerAppListener, refreshTokenGroup } from './Listeners';
+// import firebaseClient from './FirebaseClient';
+import { firebaseClient, firebaseGroup } from './api';
+import FirebaseConstants from './FirebaseConstants';
 
 // import Block from './Block';
 import StyledText from './StyledText';
@@ -30,11 +33,12 @@ const style = StyleSheet.create({
   },
 });
 
-const sendRemoteNotification = (token) => {
+const sendRemoteNotification = (token = FirebaseConstants.TOKENS) => {
   let body;
-
+  console.log('to token ', token);
   if (Platform.OS === 'android') {
     body = {
+      // registration_ids: tokens,
       to: token,
       data: {
         custom_notification: {
@@ -50,6 +54,7 @@ const sendRemoteNotification = (token) => {
     };
   } else {
     body = {
+      // registration_ids: tokens,
       to: token,
       notification: {
         title: 'Simple FCM Client',
@@ -63,7 +68,7 @@ const sendRemoteNotification = (token) => {
     };
   }
 
-  firebaseClient.send(JSON.stringify(body), 'notification');
+  firebaseClient.send(body, 'notification');
 };
 
 const sendRemoteData = (token) => {
@@ -77,7 +82,7 @@ const sendRemoteData = (token) => {
     priority: 'normal',
   };
 
-  firebaseClient.send(JSON.stringify(body), 'data');
+  firebaseClient.send(body, 'data');
 };
 
 const showLocalNotification = () => {
@@ -151,10 +156,12 @@ class MainPage extends Component {
       seconds: 5,
       token: '',
       tokenCopyFeedback: '',
+      groupToken: '',
     };
     this.setClipboardContent = this.setClipboardContent.bind(this);
     this.clearTokenCopyFeedback = this.clearTokenCopyFeedback.bind(this);
   }
+
   async componentDidMount() {
     AppState.addEventListener('change', this.handleAppStateChange);
     registerAppListener(this.props.navigation);
@@ -176,9 +183,16 @@ class MainPage extends Component {
       console.error(e);
     }
 
-    FCM.getFCMToken().then((token) => {
+    FCM.getFCMToken().then(async (token) => {
       console.log('TOKEN (getFCMToken)', token);
       this.setState({ token: token || '' });
+      await refreshTokenGroup(token);
+      AsyncStorage.getItem('groupToken')
+        .then(JSON.parse)
+        .then((groupToken) => {
+          console.log('groupToken setState', groupToken);
+          this.setState({ groupToken });
+        });
     });
 
     if (Platform.OS === 'ios') {
@@ -191,8 +205,9 @@ class MainPage extends Component {
     // FCM.subscribeToTopic('sometopic')
     // FCM.unsubscribeFromTopic('sometopic')
   }
+
   componentWillUnmount() {
-    AppState.addEventListener('change', this.handleAppStateChange);
+    AppState.removeEventListener('change', this.handleAppStateChange);
   }
 
   setClipboardContent(text) {
@@ -213,7 +228,8 @@ class MainPage extends Component {
   }
 
   render() {
-    const { token, tokenCopyFeedback } = this.state;
+    const { token, groupToken, tokenCopyFeedback } = this.state;
+    console.log('this.state ', this.state);
     return (
       <View style={[styles.block, styles.container]}>
         <ScrollView style={{ paddingHorizontal: 20 }}>
@@ -245,7 +261,13 @@ class MainPage extends Component {
             Remote notif won't be available to iOS emulators
           </Text>
           <TouchableOpacity
-            onPress={() => sendRemoteNotification(token)}
+            onPress={() => refreshTokenGroup(token)}
+            style={styles.button}
+          >
+            <Text style={styles.buttonText}>Register token in group</Text>
+          </TouchableOpacity>
+          <TouchableOpacity
+            onPress={() => sendRemoteNotification(groupToken || token)}
             style={styles.button}
           >
             <Text style={styles.buttonText}>Send Remote Notification</Text>

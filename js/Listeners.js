@@ -2,6 +2,8 @@ import { Platform, AsyncStorage, AppState } from 'react-native';
 
 import FCM, { FCMEvent, RemoteNotificationResult, WillPresentNotificationResult, NotificationType, NotificationActionType, NotificationActionOption, NotificationCategoryOption } from 'react-native-fcm';
 
+import { firebaseGroup } from './api';
+
 AsyncStorage.getItem('lastNotification').then((data) => {
   if (data) {
     // if notification arrives when app is killed, it should still be logged here
@@ -15,6 +17,15 @@ AsyncStorage.getItem('lastMessage').then((data) => {
     // if notification arrives when app is killed, it should still be logged here
     console.log('last message', JSON.parse(data));
     AsyncStorage.removeItem('lastMessage');
+  }
+});
+
+
+AsyncStorage.getItem('groupToken').then((data) => {
+  if (data) {
+    // if notification arrives when app is killed, it should still be logged here
+    console.log('last groupToken', JSON.parse(data));
+    AsyncStorage.removeItem('groupToken');
   }
 });
 
@@ -33,16 +44,42 @@ export function registerKilledListener() {
           }
         }
         if (notif._actionIdentifier === 'view') {
-          alert('User clicked View in App');
+          console.log('User clicked View in App');
         }
         if (notif._actionIdentifier === 'dismiss') {
-          alert('User clicked Dismiss');
+          console.log('User clicked Dismiss');
         }
       }, 1000);
     }
   });
 }
 
+const GROUP_NAME = 'custom.group.com.custom_id';
+
+export const refreshTokenGroup = token => AsyncStorage.getItem('lastToken')
+  .then(JSON.parse).then(async (oldToken) => {
+  // if notification arrives when app is killed, it should still be logged here
+    console.log('TOKEN (refreshUnsubscribe)', token);
+    let groupToken = await firebaseGroup.getKey(GROUP_NAME);
+    console.log('has group ', groupToken);
+    if (!groupToken) {
+      groupToken = await firebaseGroup.createGroup(GROUP_NAME, token);
+      console.log('created group ', groupToken);
+    } else if (token && token !== oldToken) {
+    // if (oldToken) firebaseGroup.remove(GROUP_NAME, oldToken, groupToken);
+    // setTimeout(() => {
+      firebaseGroup.add(GROUP_NAME, token, groupToken);
+      // }, 500);
+      console.log('token added ', token);
+    }
+    await AsyncStorage.setItem('lastToken', JSON.stringify(token));
+    if (groupToken) {
+      await AsyncStorage.setItem('groupToken', JSON.stringify(groupToken));
+      console.log('groupToken saved', groupToken);
+    } else {
+      console.log('groupToken not saved', groupToken);
+    }
+  });
 // these callback will be triggered only when app is foreground or background
 export function registerAppListener(navigation) {
   FCM.on(FCMEvent.Notification, (notif) => {
@@ -100,9 +137,7 @@ export function registerAppListener(navigation) {
     }
   });
 
-  FCM.on(FCMEvent.RefreshToken, (token) => {
-    console.log('TOKEN (refreshUnsubscribe)', token);
-  });
+  FCM.on(FCMEvent.RefreshToken, refreshTokenGroup);
 
   FCM.enableDirectChannel();
   FCM.on(FCMEvent.DirectChannelConnectionChanged, (data) => {

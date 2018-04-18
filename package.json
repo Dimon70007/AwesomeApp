@@ -9,13 +9,12 @@
 		"startServer": "react-native run-android",
 		"runAndroid": "yarn startEmulator & yarn startServer & wait",
 		"android-linux": "react-native bundle --platform android --dev false --entry-file index.android.js --bundle-output android/app/src/main/assets/index.android.bundle --assets-dest android/app/src/main/res && react-native run-android",
-		"start": "node_modules/react-native/packager/packager.sh",
-		"startAndroid": "react-native run-android",
+		"startAndroid": "react-native run-android && yarn start & wait",
 		"createSymLink": "ln -sf ../ijkprof/android-ndk-profiler-dummy/jni node_modules/react-native-ijkplayer/ijkplayer/android/android-ndk-prof",
-		"buildProd": "cd android && ./gradlew assembleRelease && cd ../ && cp android/app/build/outputs/apk/app-release.apk ./watcher_`date +%d%m%Y.%H%M%S`-`node vsn.js`-`git rev-parse --short HEAD`.apk",
+		"buildProd": "cd android && ./gradlew assembleRelease && cd ../ && cp android/app/build/outputs/apk/app-release.apk ./watcher_`date +%d%m%Y.%H%M%S`-`git rev-parse --short HEAD`.apk",
 		"lint": "node_modules/.bin/eslint .",
 		"lintWithFix": "eslint --parser 'babel-eslint' --fix ./lib/*",
-		"cleanAndroid": "watchman watch-del-all && rm -rf $TMPDIR/react-* && rm -rf ~/.cache/yarn/* && cd ./android/ && ./gradlew clean && npm start --reset-cache",
+		"cleanAndroid": "watchman watch-del-all && rm -rf $TMPDIR/react-* && rm -rf ~/.cache/yarn/* && cd ./android/ && ./gradlew clean && yarn start --reset-cache",
 		"aEmulator": "$ANDROID_HOME/tools/emulator -avd Nexus_5_API_21"
 	},
 	"dependencies": {
@@ -29,7 +28,8 @@
 		"redux-promise-middleware": "^4.3.0",
 		"redux-saga": "^0.15.6",
 		"redux-thunk": "^2.2.0",
-		"rxjs": "^5.4.3"
+		"rxjs": "^5.4.3",
+		"url": "^0.11.0"
 	},
 	"devDependencies": {
 		"babel-eslint": "^7.2.3",

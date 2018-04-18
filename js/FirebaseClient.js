@@ -13,7 +13,7 @@ class FirebaseClient {
   		'Content-Type': 'application/json',
       Authorization: `key=${FirebaseConstants.KEY}`,
   	});
-
+    console.log('request parameters ', API_URL, { method: 'POST', headers, body });
     try {
       let response = await fetch(API_URL, { method: 'POST', headers, body });
       console.log(response);
